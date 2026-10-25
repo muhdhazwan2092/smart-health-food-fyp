@@ -1,0 +1,54 @@
+name: smart_health_food
+description: SmartHealthFood - AI-powered food recognition app.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  image_picker: ^1.0.5
+  shared_preferences: ^2.2.2
+  intl: ^0.18.1
+  percent_indicator: ^4.2.3
+  url_launcher: ^6.2.1
+  http: ^1.2.0
+  uuid: ^4.5.1
+  google_generative_ai: ^0.2.0
+  supabase_flutter: ^2.0.0
+  geolocator: ^13.0.1
+  google_fonts: ^6.2.1
+  flutter_markdown: ^0.7.4
+
+  # Web packages
+  flutter_map: ^7.0.0
+  latlong2: ^0.9.0
+  flutter_map_cancellable_tile_provider: ^3.0.2
+
+  # Comment these out for web testing
+  # google_maps_flutter: ^2.5.0
+  # geolocator: ^12.0.0
+  # geocoding: ^2.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter:
+  uses-material-design: true
+
+# 👇 Moved out to its own top-level section, at column 0 — this is what
+# was missing. It must NOT be indented under dev_dependencies.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#1F4D36"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
