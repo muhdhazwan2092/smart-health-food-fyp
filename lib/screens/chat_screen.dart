@@ -6,6 +6,8 @@ import 'package:flutter/services.dart'; // Clipboard
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../themes/app_theme.dart';
+import '../services/language_state.dart';
+import '../services/app_strings.dart';
 
 class ChatScreenPage extends StatefulWidget {
   final bool isDarkMode;
@@ -26,32 +28,32 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
 
-  // Gemini API configuration
-  // TODO: move this to a secure location (e.g. --dart-define or a backend
-  // proxy) before shipping — never commit a real API key to source control.
+  // Gemini API configuration.
+  // The key is passed in at run/build time and is NOT stored in the code:
+  //   flutter run --dart-define-from-file=env.json
   static const String _apiKey = String.fromEnvironment('GEMINI_API_KEY');
   final String _modelEndpoint =
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent';
 
+  // Each message has either 'text' (typed by the user or written by the AI)
+  // or 'key' (a translation key for the app's own messages, such as the
+  // welcome message and errors, so they follow the chosen language).
   final List<Map<String, dynamic>> _messages = [
-    {
-      'text':
-          "Hi! I'm your nutrition assistant. Ask me about food, calories, or healthy eating. Type a question or tap a suggestion below.",
-      'isUser': false,
-    },
+    {'key': 'chat_welcome', 'isUser': false},
   ];
 
-  // Starter suggestions (shown first, then replaced by context-aware ones)
-  static const List<String> _starterQuestions = [
-    'How many calories in an avocado?',
-    'Best protein sources?',
-    'Is brown rice healthier?',
-    'How much water daily?',
-    'Healthy breakfast ideas',
-    'Foods for weight loss',
+  // Starter suggestions (translation keys). Shown first, then mixed with the
+  // follow-up questions the AI suggests.
+  static const List<String> _starterKeys = [
+    'chat_q1',
+    'chat_q2',
+    'chat_q3',
+    'chat_q4',
+    'chat_q5',
+    'chat_q6',
   ];
 
-  List<String> _suggestions = List.of(_starterQuestions);
+  List<String> _followUps = [];
   final Set<String> _askedQuestions = {};
 
   // Attached to the newest bot message so we can scroll to the START of it.
@@ -104,17 +106,13 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
 
       setState(() {
         _messages.add({'text': reply.answer, 'isUser': false});
-        _suggestions = _buildSuggestions(reply.followUps);
+        _followUps = reply.followUps;
         _isLoading = false;
       });
     } on TimeoutException {
       if (!mounted) return;
       setState(() {
-        _messages.add({
-          'text':
-              'Sorry, that took too long. Please check your connection and try again.',
-          'isUser': false,
-        });
+        _messages.add({'key': 'chat_err_timeout', 'isUser': false});
         _isLoading = false;
       });
     } catch (e) {
@@ -123,11 +121,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
       debugPrint('Gemini error: $e');
       if (!mounted) return;
       setState(() {
-        _messages.add({
-          'text':
-              "Sorry, I couldn't get an answer right now. Please try again in a moment.",
-          'isUser': false,
-        });
+        _messages.add({'key': 'chat_err_generic', 'isUser': false});
         _isLoading = false;
       });
     }
@@ -143,20 +137,21 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
     _sendMessage(text);
   }
 
-  /// Follow-ups from the model first, then unused starter questions.
-  List<String> _buildSuggestions(List<String> followUps) {
-    final fresh = _starterQuestions
-        .where((q) => !_askedQuestions.contains(q.toLowerCase()));
+  /// Follow-ups from the AI first, then unused starter questions, all in the
+  /// current language.
+  List<String> get _suggestions {
+    final starters = _starterKeys.map((k) => tr(k));
     return {
-      ...followUps.where((q) => !_askedQuestions.contains(q.toLowerCase())),
-      ...fresh,
+      ..._followUps.where((q) => !_askedQuestions.contains(q.toLowerCase())),
+      ...starters.where((q) => !_askedQuestions.contains(q.toLowerCase())),
     }.toList();
   }
 
   /// Splits "FOLLOWUPS: a | b | c" off the end of the model's reply.
   ({String answer, List<String> followUps}) _parseReply(String raw) {
+    // [ \t*#] (not \s) so the match never swallows the line breaks before it.
     final match = RegExp(
-      r'^[\s*#]*FOLLOWUPS:[\s*]*(.+)$',
+      r'^[ \t*#]*FOLLOWUPS:[ \t*]*(.+)$',
       multiLine: true,
       caseSensitive: false,
     ).firstMatch(raw);
@@ -178,14 +173,15 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
 
   Future<({String answer, List<String> followUps})> _getGeminiResponse(
       String userMessage) async {
-    final endpoint = '$_modelEndpoint?key=$_apiKey';
+    final language = appLanguageNotifier.value.aiName;
 
     final prompt = '''
 You are a friendly, professional nutrition and food safety assistant.
 
 Rules:
+- Write the whole reply in $language. Keep the word FOLLOWUPS in English, but write the 3 follow-up questions in $language.
 - Start with the direct answer in ONE short sentence (example: "A medium avocado has about 240 calories."). No greeting and no filler.
-- Then, only if useful, add up to 4 short bullet points with key details (macros, serving size, benefits or concerns, allergens).
+- Then, only if useful, add up to 4 short bullet points with key details (macros, serving size, benefits or concerns, allergens). Put EACH bullet on its own new line, starting with "- ".
 - Keep the whole reply under 120 words.
 - Use simple Markdown only (bold and bullet lists). Do NOT use headings, tables or horizontal rules.
 - Values are estimates; mention when they vary by size or preparation.
@@ -197,8 +193,12 @@ User question: $userMessage
 
     final response = await http
         .post(
-          Uri.parse(endpoint),
-          headers: {'Content-Type': 'application/json'},
+          Uri.parse(_modelEndpoint),
+          headers: {
+            'Content-Type': 'application/json',
+            // Key goes in a header, so it never appears in the web address.
+            'x-goog-api-key': _apiKey,
+          },
           body: jsonEncode({
             'contents': [
               {
@@ -211,16 +211,21 @@ User question: $userMessage
               'temperature': 0.7,
               'topK': 40,
               'topP': 0.95,
-              'maxOutputTokens': 1024,
+              // Newer models spend part of this on "thinking", so keep it high
+              // or the visible answer gets cut off.
+              'maxOutputTokens': 2048,
             },
           }),
         )
-        .timeout(const Duration(seconds: 30));
+        .timeout(const Duration(seconds: 60));
 
     if (response.statusCode != 200) {
       debugPrint('API body: ${response.body}');
       throw Exception('API Error (${response.statusCode})');
     }
+
+    // TEMPORARY: shows exactly what Gemini sent back. Remove once chat is OK.
+    debugPrint('Gemini raw: ${response.body}');
 
     final jsonBody = jsonDecode(response.body);
     final candidates = jsonBody['candidates'] as List?;
@@ -229,8 +234,19 @@ User question: $userMessage
       throw Exception('No response generated');
     }
 
-    final text =
-        (candidates[0]?['content']?['parts']?[0]?['text'] as String?) ?? '';
+    final finishReason = candidates[0]?['finishReason'];
+    if (finishReason != null && finishReason != 'STOP') {
+      debugPrint('Gemini finishReason: $finishReason');
+    }
+
+    // The answer can arrive split over several parts, so join all the text
+    // parts (and skip any "thought" parts) instead of reading only the first.
+    final parts = (candidates[0]?['content']?['parts'] as List?) ?? const [];
+    final text = parts
+        .where((p) => p is Map && p['thought'] != true)
+        .map((p) => (p['text'] as String?) ?? '')
+        .join()
+        .trim();
 
     if (text.isEmpty) {
       throw Exception('Empty response received');
@@ -247,17 +263,18 @@ User question: $userMessage
     final mutedText = isDarkMode
         ? Colors.white.withOpacity(0.7)
         : Colors.black.withOpacity(0.6);
+    final suggestions = _suggestions;
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         title: Text(
-          'Nutrition Chat',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
+          tr('chat_title'),
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
         ),
         backgroundColor:
             isDarkMode ? const Color(0xFF1B3B2B) : Colors.green[700],
@@ -266,7 +283,7 @@ User question: $userMessage
           IconButton(
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: widget.onToggleDarkMode,
-            tooltip: 'Toggle Dark Mode',
+            tooltip: tr('common_toggle_dark'),
           ),
         ],
       ),
@@ -286,9 +303,12 @@ User question: $userMessage
                 final message = _messages[index];
                 final isUser = message['isUser'] as bool;
                 final isLatestBot = !isUser && index == _messages.length - 1;
+                final key = message['key'] as String?;
+                final text =
+                    key != null ? tr(key) : message['text'] as String;
 
                 return _buildMessageBubble(
-                  message['text'] as String,
+                  text,
                   isUser,
                   isDarkMode,
                   key: isLatestBot ? _latestBotKey : null,
@@ -300,7 +320,7 @@ User question: $userMessage
 
           // Quick question chips (context-aware, with a fade on the right
           // edge so it is obvious the row scrolls)
-          if (!_isLoading && _suggestions.isNotEmpty)
+          if (!_isLoading && suggestions.isNotEmpty)
             Container(
               height: 50,
               margin: const EdgeInsets.symmetric(vertical: 4),
@@ -313,11 +333,11 @@ User question: $userMessage
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(left: 16, right: 32),
-                  itemCount: _suggestions.length,
+                  itemCount: suggestions.length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(width: 8),
                   itemBuilder: (context, index) {
-                    final q = _suggestions[index];
+                    final q = suggestions[index];
                     return ActionChip(
                       label: Text(
                         q,
@@ -381,8 +401,8 @@ User question: $userMessage
                           ),
                           decoration: InputDecoration(
                             hintText: _isLoading
-                                ? 'Waiting for answer...'
-                                : 'Ask about nutrition...',
+                                ? tr('chat_hint_waiting')
+                                : tr('chat_hint'),
                             hintStyle: TextStyle(color: mutedText),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
@@ -396,7 +416,7 @@ User question: $userMessage
                                 horizontal: 20, vertical: 12),
                             suffixIcon: _messageController.text.isNotEmpty
                                 ? IconButton(
-                                    tooltip: 'Clear',
+                                    tooltip: tr('chat_clear'),
                                     icon: Icon(Icons.clear,
                                         color: mutedText, size: 20),
                                     onPressed: () {
@@ -429,7 +449,7 @@ User question: $userMessage
                           ),
                         ),
                         child: IconButton(
-                          tooltip: 'Send message',
+                          tooltip: tr('chat_send'),
                           onPressed: _isLoading ? null : _handleTextFieldSubmit,
                           icon: const Icon(Icons.send,
                               color: Colors.white, size: 20),
@@ -439,7 +459,8 @@ User question: $userMessage
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Nutrition values are estimates, not medical advice.',
+                    tr('chat_disclaimer'),
+                    textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 11, color: mutedText),
                   ),
                 ],
@@ -516,7 +537,7 @@ User question: $userMessage
                     Icon(Icons.eco_outlined, size: 14, color: botNameColor),
                     const SizedBox(width: 4),
                     Text(
-                      'Nutrition Assistant',
+                      tr('chat_name'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -555,7 +576,7 @@ User question: $userMessage
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  'You',
+                  tr('chat_you'),
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withOpacity(0.9),
@@ -567,7 +588,7 @@ User question: $userMessage
               Align(
                 alignment: Alignment.centerRight,
                 child: IconButton(
-                  tooltip: 'Copy answer',
+                  tooltip: tr('chat_copy'),
                   visualDensity: VisualDensity.compact,
                   iconSize: 18,
                   color: botNameColor,
@@ -575,9 +596,9 @@ User question: $userMessage
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: text));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Copied to clipboard'),
-                        duration: Duration(seconds: 1),
+                      SnackBar(
+                        content: Text(tr('chat_copied')),
+                        duration: const Duration(seconds: 1),
                       ),
                     );
                   },
@@ -626,7 +647,7 @@ User question: $userMessage
             ),
             const SizedBox(width: 12),
             Text(
-              'Thinking...',
+              tr('chat_thinking'),
               style: TextStyle(
                 color: isDarkMode
                     ? Colors.white.withOpacity(0.87)

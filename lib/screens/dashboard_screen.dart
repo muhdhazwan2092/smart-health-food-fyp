@@ -3,6 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../services/supabase_service.dart';
 import '../services/goal_state.dart';
+import '../services/language_state.dart';
+import '../services/app_strings.dart';
 import '../models/food_history_item.dart';
 import '../widgets/depth_progress_ring.dart';
 
@@ -34,7 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<DateTime> _weekDays = [];
   List<int> _weekTotals = List<int>.filled(7, 0);
 
-  // The goal now comes from the user's profile (see goal_state.dart).
+  // The goal comes from the user's profile (see goal_state.dart).
   int get _dailyGoal => dailyGoalNotifier.value;
 
   @override
@@ -42,6 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     dailyGoalNotifier.addListener(_onGoalChanged);
     dashboardRefreshNotifier.addListener(_onRefreshRequested);
+    appLanguageNotifier.addListener(_onLanguageChanged);
     _loadData();
   }
 
@@ -49,6 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void dispose() {
     dailyGoalNotifier.removeListener(_onGoalChanged);
     dashboardRefreshNotifier.removeListener(_onRefreshRequested);
+    appLanguageNotifier.removeListener(_onLanguageChanged);
     super.dispose();
   }
 
@@ -60,6 +64,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Rebuild straight away when the goal is changed in Profile.
   void _onGoalChanged() {
+    if (mounted) setState(() {});
+  }
+
+  // Rebuild straight away when the language is changed in Profile.
+  void _onLanguageChanged() {
     if (mounted) setState(() {});
   }
 
@@ -102,9 +111,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         // pushed scans made after 4 PM into "tomorrow" (the time is saved
         // without a timezone, so Malaysia's +8 hours got added on top).
         final t = item.timestamp;
-        // TEMPORARY check, remove once the totals look right:
-        debugPrint(
-            'SCAN ${item.foodName} | ${item.calories} cal | ${item.timestamp} | isUtc=${item.timestamp.isUtc}');
         for (var i = 0; i < 7; i++) {
           if (t.year == days[i].year &&
               t.month == days[i].month &&
@@ -171,17 +177,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: isDarkMode ? Colors.white : Colors.black87,
               ),
         ),
-        backgroundColor:
-            isDarkMode ? const Color(0xFF1B3B2B) : Colors.green[700],
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
-            tooltip: 'Toggle dark mode',
+            tooltip: tr('common_toggle_dark'),
             icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: widget.onToggleDarkMode,
           ),
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: tr('common_refresh'),
             icon: const Icon(Icons.refresh),
             onPressed: _loadData,
           ),
@@ -191,12 +194,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onRefresh: _loadData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Welcome back',
+                tr('dash_welcome'),
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -205,7 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Track your nutrition with AI-powered food recognition.',
+                tr('dash_subtitle'),
                 style: TextStyle(fontSize: 14, color: mutedText),
               ),
               const SizedBox(height: 24),
@@ -236,7 +239,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   children: [
                     Text(
-                      "Today's Progress",
+                      tr('dash_progress'),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -267,7 +270,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           Text(
-                            isOver ? 'cal over' : 'cal left',
+                            isOver ? tr('ring_over') : tr('ring_left'),
                             style: TextStyle(fontSize: 14, color: mutedText),
                           ),
                         ],
@@ -278,26 +281,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildStatItem(
-                          'Calories today',
+                          tr('stat_calories_today'),
                           _fmt(_totalCaloriesToday),
-                          '/ ${_fmt(goal)} cal',
+                          tr('stat_of_goal', {'goal': _fmt(goal)}),
                           isDarkMode,
                         ),
                         _buildStatItem(
-                          'Total scans',
+                          tr('stat_total_scans'),
                           '$_scansToday',
-                          'today',
+                          tr('stat_today'),
                           isDarkMode,
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Daily calorie goal',
+                      tr('goal_label'),
                       style: TextStyle(color: mutedText, fontSize: 14),
                     ),
                     Text(
-                      '$realPercent% of daily goal',
+                      tr('percent_of_goal', {'p': '$realPercent'}),
                       style: TextStyle(
                         color: isOver
                             ? warnColor
@@ -325,7 +328,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             const SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                "You're ${_fmt(overBy)} cal over today's goal",
+                                tr('over_message', {'n': _fmt(overBy)}),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -353,8 +356,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: ElevatedButton.icon(
                   onPressed: widget.onNavigateToScan,
                   icon: const Icon(Icons.camera_alt),
-                  label: const Text('Scan Food Now',
-                      style: TextStyle(fontSize: 16)),
+                  label: Text(tr('dash_scan_now'),
+                      style: const TextStyle(fontSize: 16)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         isDarkMode ? const Color(0xFF2E7D32) : Colors.green,
@@ -369,7 +372,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // ── Recent scans ───────────────────────────
               Text(
-                'Recent Scans',
+                tr('dash_recent'),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -396,7 +399,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               isDarkMode ? Colors.grey[600] : Colors.grey[400]),
                       const SizedBox(height: 12),
                       Text(
-                        'No recent scans',
+                        tr('dash_no_recent'),
                         style: TextStyle(
                           color:
                               isDarkMode ? Colors.grey[500] : Colors.grey[600],
@@ -447,7 +450,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                 ),
                                 Text(
-                                  '${item.calories} cal · ${item.timestamp.day}/${item.timestamp.month}/${item.timestamp.year}',
+                                  tr('scan_item', {
+                                    'cal': '${item.calories}',
+                                    'date':
+                                        '${item.timestamp.day}/${item.timestamp.month}/${item.timestamp.year}',
+                                  }),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: mutedText,
@@ -495,7 +502,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Last 7 days',
+                tr('week_title'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -504,8 +511,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               Text(
                 average == null
-                    ? 'No data yet'
-                    : 'Avg ${_fmt(average)} cal/day',
+                    ? tr('no_data_yet')
+                    : tr('avg_per_day', {'n': _fmt(average)}),
                 style: TextStyle(fontSize: 13, color: mutedText),
               ),
             ],
@@ -566,15 +573,25 @@ class _WeeklyChart extends StatelessWidget {
     required this.fmt,
   });
 
-  static const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // Translation keys, Monday first (DateTime.weekday is 1 = Monday).
+  static const _dayKeys = [
+    'day_mon',
+    'day_tue',
+    'day_wed',
+    'day_thu',
+    'day_fri',
+    'day_sat',
+    'day_sun',
+  ];
   static const double _barArea = 110;
   static const double _valueRow = 18;
 
   String _short(int v) =>
       v >= 1000 ? '${(v / 1000).toStringAsFixed(1)}k' : '$v';
 
-  String _dayLabel(int i) =>
-      i == days.length - 1 ? 'Today' : _dayNames[days[i].weekday - 1];
+  String _dayLabel(int i) => i == days.length - 1
+      ? tr('chart_today')
+      : tr(_dayKeys[days[i].weekday - 1]);
 
   @override
   Widget build(BuildContext context) {
@@ -590,11 +607,11 @@ class _WeeklyChart extends StatelessWidget {
 
     final summary = List.generate(
       days.length,
-      (i) => '${_dayLabel(i)} ${totals[i]} calories',
+      (i) => tr('chart_day_cal', {'day': _dayLabel(i), 'n': '${totals[i]}'}),
     ).join(', ');
 
     return Semantics(
-      label: 'Calories for the last 7 days, goal $goal. $summary',
+      label: tr('chart_semantics', {'goal': '$goal', 'summary': summary}),
       child: ExcludeSemantics(
         child: Column(
           children: [
@@ -691,7 +708,7 @@ class _WeeklyChart extends StatelessWidget {
               children: [
                 _legend(
                   Container(width: 16, height: 2, color: lineColor),
-                  'Goal ${fmt(goal)} cal',
+                  tr('legend_goal', {'n': fmt(goal)}),
                   muted,
                 ),
                 _legend(
@@ -703,7 +720,7 @@ class _WeeklyChart extends StatelessWidget {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  'Over goal',
+                  tr('legend_over'),
                   muted,
                 ),
               ],

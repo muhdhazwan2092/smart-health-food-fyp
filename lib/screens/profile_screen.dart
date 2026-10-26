@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../themes/app_theme.dart';
 import '../services/goal_state.dart';
+import '../services/language_state.dart';
 import '../widgets/calorie_goal_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -134,6 +135,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ---------------------------------------------------------------------
   // Email helpers
   // ---------------------------------------------------------------------
+  Future<void> _openLanguageSheet() async {
+    final isDark = widget.isDarkMode;
+    final current = appLanguageNotifier.value;
+
+    final chosen = await showModalBottomSheet<AppLanguage>(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1B3B2B) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Language',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : AppColors.ink,
+                  ),
+                ),
+              ),
+            ),
+            ...AppLanguage.values.map((lang) {
+              final selected = lang == current;
+              return ListTile(
+                minVerticalPadding: 12,
+                leading: Icon(
+                  selected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                  color: selected
+                      ? (isDark ? const Color(0xFF81C784) : AppColors.primary)
+                      : (isDark ? Colors.white54 : Colors.grey[600]),
+                ),
+                title: Text(
+                  lang.nativeName,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: isDark ? Colors.white : AppColors.ink,
+                  ),
+                ),
+                subtitle: Text(
+                  lang.englishName,
+                  style: TextStyle(
+                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                  ),
+                ),
+                onTap: () => Navigator.pop(ctx, lang),
+              );
+            }),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+
+    if (chosen == null || !mounted) return;
+    await setAppLanguage(chosen);
+    if (!mounted) return;
+    setState(() {});
+    _showSnack('Language set to ${chosen.nativeName}.', isError: false);
+  }
+
   Future<void> _openGoalDialog() async {
     final result = await showDialog<int>(
       context: context,
@@ -257,7 +328,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await supabase.auth.signOut();
     if (mounted) {
       // Clear the whole back stack so Back can't return to the main app.
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/login', (route) => false);
     }
   }
 
@@ -459,10 +531,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ? 'Email verified'
                                     : 'Email not verified',
                                 color: isEmailVerified
-                                    ? (isDark
-                                        ? const Color.fromARGB(
-                                            255, 196, 184, 184)
-                                        : AppColors.primary)
+                                    ? (isDark ? Colors.white : AppColors.primary)
                                     : Colors.orange.shade700,
                               )
                             else
@@ -493,9 +562,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: const Icon(Icons.edit_rounded, size: 18),
                       label: const Text('Edit profile'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: isDark
-                            ? const Color(0xFF81C784)
-                            : AppColors.primary,
+                        foregroundColor:
+                            isDark ? const Color(0xFF81C784) : AppColors.primary,
                         side: BorderSide(
                           color: isDark
                               ? const Color(0xFF81C784)
@@ -533,8 +601,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ListTile(
                 minVerticalPadding: 14,
                 leading: Icon(Icons.local_fire_department_rounded,
-                    color:
-                        isDark ? const Color(0xFF81C784) : AppColors.primary),
+                    color: isDark ? const Color(0xFF81C784) : AppColors.primary),
                 title: Text(
                   'Daily calorie goal',
                   style: TextStyle(
@@ -555,6 +622,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 32),
 
             // ── Security section ───────────────────────────
+            // ── Language ───────────────────────────────────
+            Text(
+              'Language',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : AppColors.ink,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: tagRadius(r: 20, sharp: 8),
+                border: Border.all(color: borderColor),
+              ),
+              child: ListTile(
+                minVerticalPadding: 14,
+                leading: Icon(Icons.translate_rounded,
+                    color: isDark ? const Color(0xFF81C784) : AppColors.primary),
+                title: Text(
+                  appLanguageNotifier.value.nativeName,
+                  style: TextStyle(
+                    color: primaryText,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'AI answers use this language · tap to change',
+                  style: TextStyle(color: mutedText),
+                ),
+                trailing: Icon(Icons.chevron_right_rounded,
+                    color: isDark ? Colors.white70 : AppColors.inkSoft),
+                onTap: _openLanguageSheet,
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // ── Security ───────────────────────────────────
             Text(
               'Security',
               style: TextStyle(

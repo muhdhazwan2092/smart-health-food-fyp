@@ -453,7 +453,7 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : Colors.black87,
+                color: Colors.white,
               ),
         ),
         backgroundColor: isDark ? const Color(0xFF1B3B2B) : Colors.green[700],

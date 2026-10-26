@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'themes/app_theme.dart';
 import 'services/goal_state.dart';
+import 'services/language_state.dart';
+import 'services/app_strings.dart';
 import 'screens/login_screen.dart';
 import 'screens/chat_screen.dart';
 import 'screens/dashboard_screen.dart';
@@ -24,6 +26,9 @@ void main() async {
     url: kSupabaseUrl,
     anonKey: kSupabaseAnonKey,
   );
+
+  // Restore the language the user picked last time (Profile > Language).
+  await loadSavedLanguage();
 
   runApp(const SmartHealthFoodApp());
 }
@@ -198,7 +203,19 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   }
 
   @override
+  void initState() {
+    super.initState();
+    appLanguageNotifier.addListener(_onLanguageChanged);
+  }
+
+  // Rebuild the navigation bar and menu when the language is changed.
+  void _onLanguageChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    appLanguageNotifier.removeListener(_onLanguageChanged);
     _fabController.dispose();
     super.dispose();
   }
@@ -261,22 +278,22 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     (
       icon: Icons.dashboard_outlined,
       activeIcon: Icons.dashboard_rounded,
-      label: 'Dashboard'
+      label: 'nav_dashboard'
     ),
     (
       icon: Icons.camera_alt_outlined,
       activeIcon: Icons.camera_alt_rounded,
-      label: 'Scan'
+      label: 'nav_scan'
     ),
     (
       icon: Icons.history_outlined,
       activeIcon: Icons.history_rounded,
-      label: 'History'
+      label: 'nav_history'
     ),
     (
       icon: Icons.location_on_outlined,
       activeIcon: Icons.location_on_rounded,
-      label: 'Places'
+      label: 'nav_places'
     ),
   ];
 
@@ -366,7 +383,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
                                     : FontWeight.w500,
                                 color: fg,
                               ),
-                              child: Text(item.label),
+                              child: Text(tr(item.label)),
                             ),
                           ],
                         ),
@@ -393,14 +410,14 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
             _miniAction(
               visible: _fabController.value,
               icon: Icons.person_outline_rounded,
-              label: 'Profile',
+              label: tr('menu_profile'),
               onTap: _openProfile,
             ),
             const SizedBox(height: 12),
             _miniAction(
               visible: _fabController.value,
               icon: Icons.chat_bubble_outline_rounded,
-              label: 'Nutrition Chat',
+              label: tr('menu_chat'),
               onTap: _openChat,
             ),
             const SizedBox(height: 16),
@@ -409,7 +426,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
             // (opens Chat & Profile), instead of a misleading "+".
             FloatingActionButton(
               onPressed: _toggleFab,
-              tooltip: _fabOpen ? 'Close menu' : 'Chat & Profile',
+              tooltip: _fabOpen ? tr('menu_close') : tr('menu_open'),
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(

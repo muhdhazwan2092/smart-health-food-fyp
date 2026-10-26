@@ -9,6 +9,8 @@ import '../services/scan_controller.dart';
 import '../services/api_service.dart';
 import '../services/supabase_service.dart';
 import '../services/storage_service.dart';
+import '../services/language_state.dart';
+import '../services/app_strings.dart';
 import '../models/food_analysis_result.dart';
 
 class ScanScreenPage extends StatefulWidget {
@@ -38,19 +40,32 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
   FoodAnalysisResult? result;
   bool isProcessing = false;
 
-  /// Friendly message shown with the "Try again" button. Null = no error.
-  String? errorMessage;
+  /// Translation key of the error to show with the "Try again" button
+  /// (for example 'err_timeout'). Null = no error.
+  String? errorKey;
 
   bool get _hasImage => selectedImage != null || selectedImageBytes != null;
 
   @override
   void initState() {
     super.initState();
+    appLanguageNotifier.addListener(_onLanguageChanged);
     controller = ScanController(
       api: ApiService('GEMINI', _apiKey),
       supabase: SupabaseService(),
       storage: StorageService(),
     );
+  }
+
+  @override
+  void dispose() {
+    appLanguageNotifier.removeListener(_onLanguageChanged);
+    super.dispose();
+  }
+
+  // Rebuild straight away when the language is changed in Profile.
+  void _onLanguageChanged() {
+    if (mounted) setState(() {});
   }
 
   // ======================
@@ -68,14 +83,14 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
         selectedImage = null;
         selectedImageBytes = bytes;
         result = null;
-        errorMessage = null;
+        errorKey = null;
       });
     } else {
       setState(() {
         selectedImage = File(img.path);
         selectedImageBytes = null;
         result = null;
-        errorMessage = null;
+        errorKey = null;
       });
     }
     analyzeFood();
@@ -110,44 +125,38 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
       if (!mounted) return;
       setState(() {
         result = data;
-        errorMessage = null;
+        errorKey = null;
         isProcessing = false;
       });
     } catch (e) {
       debugPrint('analyzeFood error: $e'); // full details stay in the console
       if (!mounted) return;
       setState(() {
-        errorMessage = _friendlyError(e);
+        errorKey = _errorKeyFor(e);
         isProcessing = false;
       });
     }
   }
 
-  /// Turns a raw exception into a short, human message.
-  String _friendlyError(Object e) {
+  /// Picks which short, friendly message (translation key) fits the error.
+  String _errorKeyFor(Object e) {
     final msg = e.toString().toLowerCase();
 
     if (e is TimeoutException ||
         msg.contains('timeout') ||
         msg.contains('timed out')) {
-      return 'Analysis took too long. Check your connection and try again.';
+      return 'err_timeout';
     }
     if (msg.contains('socketexception') ||
         msg.contains('failed host lookup') ||
         msg.contains('clientexception') ||
         msg.contains('network')) {
-      return 'No internet connection. Check your connection and try again.';
+      return 'err_network';
     }
-    if (msg.contains('429') || msg.contains('quota')) {
-      return 'Too many requests right now. Please wait a minute and try again.';
-    }
-    if (msg.contains('403') || msg.contains('api key')) {
-      return 'The AI service rejected the request. The API key may be missing or wrong.';
-    }
-    if (msg.contains('503') || msg.contains('overloaded')) {
-      return 'The AI service is busy right now. Please try again in a moment.';
-    }
-    return "Couldn't analyze this image. Please try again.";
+    if (msg.contains('429') || msg.contains('quota')) return 'err_rate';
+    if (msg.contains('403') || msg.contains('api key')) return 'err_key';
+    if (msg.contains('503') || msg.contains('overloaded')) return 'err_busy';
+    return 'err_generic';
   }
 
   // ======================
@@ -180,7 +189,7 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    errorMessage!,
+                    tr(errorKey!),
                     style: TextStyle(
                       color: textColor,
                       fontSize: 14,
@@ -206,7 +215,9 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
                         ),
                       )
                     : const Icon(Icons.refresh),
-                label: Text(isProcessing ? 'Analyzing...' : 'Try again'),
+                label: Text(
+                  isProcessing ? tr('scan_analyzing') : tr('scan_try_again'),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade700,
                   foregroundColor: Colors.white,
@@ -295,7 +306,7 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
 
           const SizedBox(height: 6),
           Text(
-            'Serving: ${r.servingSize}',
+            tr('scan_serving', {'s': r.servingSize}),
             style: TextStyle(
               fontSize: 13,
               color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -322,7 +333,7 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
                   ),
                 ),
                 Text(
-                  'Estimated Calories',
+                  tr('scan_est_cal'),
                   style: TextStyle(
                     color: isDark ? Colors.grey[400] : Colors.black54,
                   ),
@@ -334,17 +345,17 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
           const SizedBox(height: 20),
 
           // ── Nutrition breakdown ───────────────────
-          _sectionTitle('Nutrition Breakdown', isDark),
+          _sectionTitle(tr('scan_nutrition'), isDark),
           const SizedBox(height: 10),
           _buildNutritionGrid(r.nutrition, isDark),
 
           const SizedBox(height: 20),
 
           // ── Allergens ─────────────────────────────
-          _sectionTitle('Allergens', isDark),
+          _sectionTitle(tr('scan_allergens'), isDark),
           const SizedBox(height: 8),
           r.allergens.isEmpty
-              ? _infoPill('None detected', Colors.green, isDark)
+              ? _infoPill(tr('scan_none_detected'), Colors.green, isDark)
               : Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -357,7 +368,7 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
 
           // ── Diet tags ─────────────────────────────
           if (r.dietTags.isNotEmpty) ...[
-            _sectionTitle('Diet Tags', isDark),
+            _sectionTitle(tr('scan_diet_tags'), isDark),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -370,7 +381,7 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
           ],
 
           // ── Ingredients ───────────────────────────
-          _sectionTitle('Ingredients', isDark),
+          _sectionTitle(tr('scan_ingredients'), isDark),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -449,12 +460,12 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
 
   Widget _buildNutritionGrid(NutritionInfo n, bool isDark) {
     final items = [
-      ('Protein', '${n.proteinG.toStringAsFixed(1)}g', Colors.blue),
-      ('Carbs', '${n.carbsG.toStringAsFixed(1)}g', Colors.orange),
-      ('Fat', '${n.fatG.toStringAsFixed(1)}g', Colors.red),
-      ('Fiber', '${n.fiberG.toStringAsFixed(1)}g', Colors.green),
-      ('Sugar', '${n.sugarG.toStringAsFixed(1)}g', Colors.pink),
-      ('Sodium', '${n.sodiumMg.toStringAsFixed(0)}mg', Colors.purple),
+      (tr('nut_protein'), '${n.proteinG.toStringAsFixed(1)}g', Colors.blue),
+      (tr('nut_carbs'), '${n.carbsG.toStringAsFixed(1)}g', Colors.orange),
+      (tr('nut_fat'), '${n.fatG.toStringAsFixed(1)}g', Colors.red),
+      (tr('nut_fiber'), '${n.fiberG.toStringAsFixed(1)}g', Colors.green),
+      (tr('nut_sugar'), '${n.sugarG.toStringAsFixed(1)}g', Colors.pink),
+      (tr('nut_sodium'), '${n.sodiumMg.toStringAsFixed(0)}mg', Colors.purple),
     ];
 
     return GridView.count(
@@ -486,6 +497,8 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
               ),
               Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 11,
                   color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -510,19 +523,19 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
           isDark ? const Color(0xFF0F0F0F) : const Color(0xFFEAF7EA),
       appBar: AppBar(
         title: Text(
-          'Food Scanner',
+          tr('scan_title'),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : Colors.black87,
               ),
         ),
-        backgroundColor: isDark ? const Color(0xFF1B3B2B) : Colors.green[700],
-        foregroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : Colors.black,
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Toggle dark mode',
+            tooltip: tr('common_toggle_dark'),
             icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
             onPressed: widget.onToggleDarkMode,
           ),
@@ -531,12 +544,13 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            // Extra bottom space so the floating button never covers content.
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Scan Food',
+                  tr('scan_heading'),
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -545,7 +559,7 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'Upload a photo to analyze nutrition, allergens & more.',
+                  tr('scan_subtitle'),
                   style: TextStyle(
                     color: isDark ? Colors.grey[400] : Colors.grey[700],
                   ),
@@ -571,20 +585,22 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
                               border: Border.all(color: Colors.green),
                               color: isDark ? const Color(0xFF2A2A2A) : null,
                             ),
-                            child: const Column(
+                            child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                CircleAvatar(
+                                const CircleAvatar(
                                   backgroundColor: Color(0xFFE8F5E9),
                                   child: Icon(Icons.camera_alt,
                                       color: Colors.green),
                                 ),
-                                SizedBox(height: 10),
-                                Text('Take Photo',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w600)),
-                                Text('Use camera',
-                                    style: TextStyle(fontSize: 12)),
+                                const SizedBox(height: 10),
+                                Text(tr('scan_take_photo'),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w600)),
+                                Text(tr('scan_use_camera'),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(fontSize: 12)),
                               ],
                             ),
                           ),
@@ -601,19 +617,22 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
                               border: Border.all(color: Colors.green),
                               color: isDark ? const Color(0xFF2A2A2A) : null,
                             ),
-                            child: const Column(
+                            child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                CircleAvatar(
+                                const CircleAvatar(
                                   backgroundColor: Color(0xFFE8F5E9),
-                                  child: Icon(Icons.image, color: Colors.green),
+                                  child:
+                                      Icon(Icons.image, color: Colors.green),
                                 ),
-                                SizedBox(height: 10),
-                                Text('Gallery',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w600)),
-                                Text('JPG, PNG',
-                                    style: TextStyle(fontSize: 12)),
+                                const SizedBox(height: 10),
+                                Text(tr('scan_gallery'),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w600)),
+                                Text(tr('scan_formats'),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(fontSize: 12)),
                               ],
                             ),
                           ),
@@ -651,7 +670,7 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
 
                 // Shown only when the analysis failed. Keeps the same photo
                 // so "Try again" doesn't need a new pick.
-                if (errorMessage != null && _hasImage) _buildErrorCard(isDark),
+                if (errorKey != null && _hasImage) _buildErrorCard(isDark),
 
                 if (result != null) _buildResultCard(isDark),
               ],
@@ -659,17 +678,17 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
           ),
           // Full-screen loader for the first attempt. During a retry the
           // spinner lives inside the "Try again" button instead.
-          if (isProcessing && errorMessage == null)
+          if (isProcessing && errorKey == null)
             Container(
               color: Colors.black54,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 10),
-                    Text('Analyzing food...',
-                        style: TextStyle(color: Colors.white)),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 10),
+                    Text(tr('scan_analyzing_food'),
+                        style: const TextStyle(color: Colors.white)),
                   ],
                 ),
               ),
