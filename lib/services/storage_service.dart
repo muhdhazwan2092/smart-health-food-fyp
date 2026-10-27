@@ -7,9 +7,7 @@ class StorageService {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getStringList('food_history') ?? [];
 
-    return data
-        .map((e) => FoodHistoryItem.fromJson(jsonDecode(e)))
-        .toList();
+    return data.map((e) => FoodHistoryItem.fromJson(jsonDecode(e))).toList();
   }
 
   Future<void> saveHistory(List<FoodHistoryItem> history) async {

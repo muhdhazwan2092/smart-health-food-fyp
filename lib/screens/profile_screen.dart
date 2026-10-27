@@ -328,8 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await supabase.auth.signOut();
     if (mounted) {
       // Clear the whole back stack so Back can't return to the main app.
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil('/login', (route) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     }
   }
 
@@ -421,10 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Text(
       'Your Profile',
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
+          fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white),
     );
   }
 
@@ -453,7 +449,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (_isLoadingProfile) {
       return Scaffold(
-        appBar: AppBar(title: _appBarTitle(isDark)),
+        appBar: AppBar(
+          title: _appBarTitle(isDark),
+          backgroundColor: isDark ? const Color(0xFF1B3B2B) : Colors.green[700],
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -464,6 +463,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: _appBarTitle(isDark),
+        backgroundColor: isDark ? const Color(0xFF1B3B2B) : Colors.green[700],
         actions: [
           IconButton(
             tooltip: 'Toggle dark mode',
@@ -531,7 +531,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ? 'Email verified'
                                     : 'Email not verified',
                                 color: isEmailVerified
-                                    ? (isDark ? Colors.white : AppColors.primary)
+                                    ? (isDark
+                                        ? Colors.white
+                                        : AppColors.primary)
                                     : Colors.orange.shade700,
                               )
                             else
@@ -562,8 +564,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: const Icon(Icons.edit_rounded, size: 18),
                       label: const Text('Edit profile'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor:
-                            isDark ? const Color(0xFF81C784) : AppColors.primary,
+                        foregroundColor: isDark
+                            ? const Color(0xFF81C784)
+                            : AppColors.primary,
                         side: BorderSide(
                           color: isDark
                               ? const Color(0xFF81C784)
@@ -601,7 +604,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ListTile(
                 minVerticalPadding: 14,
                 leading: Icon(Icons.local_fire_department_rounded,
-                    color: isDark ? const Color(0xFF81C784) : AppColors.primary),
+                    color:
+                        isDark ? const Color(0xFF81C784) : AppColors.primary),
                 title: Text(
                   'Daily calorie goal',
                   style: TextStyle(
@@ -641,7 +645,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ListTile(
                 minVerticalPadding: 14,
                 leading: Icon(Icons.translate_rounded,
-                    color: isDark ? const Color(0xFF81C784) : AppColors.primary),
+                    color:
+                        isDark ? const Color(0xFF81C784) : AppColors.primary),
                 title: Text(
                   appLanguageNotifier.value.nativeName,
                   style: TextStyle(
@@ -746,7 +751,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(
-                                onPressed: () => _sendPasswordReset(rawEmail!),
+                                onPressed: () => _sendPasswordReset(rawEmail),
                                 child: const Text('Forgot current password?'),
                               ),
                             ),

@@ -27,13 +27,13 @@ class NutritionInfo {
   }
 
   static NutritionInfo empty() => NutritionInfo(
-    proteinG: 0,
-    carbsG: 0,
-    fatG: 0,
-    fiberG: 0,
-    sugarG: 0,
-    sodiumMg: 0,
-  );
+        proteinG: 0,
+        carbsG: 0,
+        fatG: 0,
+        fiberG: 0,
+        sugarG: 0,
+        sodiumMg: 0,
+      );
 }
 
 class FoodAnalysisResult {

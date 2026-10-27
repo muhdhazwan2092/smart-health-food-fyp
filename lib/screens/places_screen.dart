@@ -13,7 +13,7 @@ class Restaurant {
   final String id;
   final String name;
   final String cuisine;
-  final double rating;
+  final double? rating;
   final String address;
   final String hours;
   final List<String> tags;
@@ -44,97 +44,162 @@ class Restaurant {
 const List<Restaurant> mockRestaurants = [
   Restaurant(
     id: '1',
-    name: 'Hijau Segar Cafe',
-    cuisine: 'Organic & Vegetarian',
-    rating: 4.8,
-    address: 'Jalan Besar, 35900 Tanjung Malim, Perak',
-    hours: '8:00 AM - 9:00 PM',
-    tags: ['Vegan', 'Organic', 'Gluten-Free'],
-    description:
-        'Farm-to-table organic dishes with locally sourced ingredients from Perak farms.',
-    priceRange: 'RM',
-    lat: 3.6847,
-    lng: 101.5185,
+    name: 'Rumah Makan Sri Muallim',
+    cuisine: 'Traditional Malay',
+    rating: null,
+    address: 'Lot 4620, Jalan Slim Lama, 35900 Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Malay', 'Traditional', 'Vegetables'],
+    description: 'Traditional Malay dishes, including ulam-ulaman '
+        'and local favourites. Check the menu for suitable '
+        'options based on your dietary needs.',
+    priceRange: 'Check menu',
+    lat: 3.6906547903,
+    lng: 101.5234290331,
   ),
   Restaurant(
     id: '2',
-    name: 'UPSI Healthy Bowl Bar',
-    cuisine: 'Health Bowls',
-    rating: 4.6,
-    address: 'Jalan Sultan Idris, Tanjung Malim, Perak',
-    hours: '7:00 AM - 8:00 PM',
-    tags: ['Bowls', 'Smoothies', 'High-Protein'],
-    description:
-        'Customizable nutrient-packed bowls and fresh tropical smoothies near UPSI campus.',
-    priceRange: 'RM',
-    lat: 3.6863,
-    lng: 101.5240,
+    name: '(RUMAH SAYUR) Veggie Home',
+    cuisine: 'Vegetarian',
+    rating: 4.4,
+    address: '13, Jalan Bernam 2/1, Taman Bernam Baru, '
+        '35900 Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Vegetarian', 'Vegetables', 'Plant-Based'],
+    description: 'Vegetarian meals and cooked vegetable dishes. '
+        'Confirm the current menu and address before visiting.',
+    priceRange: 'Check menu',
+    lat: 3.6860, // TODO: verify coordinates
+    lng: 101.5200, // TODO: verify coordinates
   ),
   Restaurant(
     id: '3',
-    name: 'Rumah Makan Sihat',
-    cuisine: 'Malay Healthy',
-    rating: 4.7,
-    address: 'Jalan Slim, 35900 Tanjung Malim, Perak',
-    hours: '11:00 AM - 10:00 PM',
-    tags: ['Malay', 'Low-Carb', 'Grilled Fish'],
-    description:
-        'Traditional Malay dishes prepared with less oil and fresh ikan bakar.',
-    priceRange: 'RM RM',
-    lat: 3.6890,
-    lng: 101.5160,
+    name: 'Kedai Makan Masakan Kampung Kak Ina',
+    cuisine: 'Traditional Malay',
+    rating: 4.3,
+    address: 'No. 8, Jalan Douglas, Pekan, '
+        '35900 Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Malay', 'Traditional', 'Vegetables'],
+    description: 'Traditional kampung-style meals. Check for vegetable '
+        'dishes and choose meals that suit your dietary needs.',
+    priceRange: 'Check menu',
+    lat: 3.6840, // TODO: verify coordinates
+    lng: 101.5240, // TODO: verify coordinates
   ),
   Restaurant(
     id: '4',
-    name: 'Sakura Zen Sushi',
-    cuisine: 'Japanese Fusion',
-    rating: 4.5,
-    address: 'Bandar Behrang 2020, Tanjung Malim, Perak',
-    hours: '11:30 AM - 9:30 PM',
-    tags: ['Japanese', 'Low-Cal', 'Omega-3'],
-    description:
-        'Fresh sushi rolls and creative salads with light Asian dressings.',
-    priceRange: 'RM RM',
-    lat: 3.6810,
-    lng: 101.5290,
+    name: "De' Nutri Hub Tanjong Malim",
+    cuisine: 'Health Food',
+    rating: null,
+    address: 'No. 9A, Tingkat 1, Jalan Bunga Anggerik, '
+        '35900 Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Health Food', 'Nutrition'],
+    description: 'Listed as a health-food business. Verify that it is '
+        'still operating and check its current menu.',
+    priceRange: 'Check menu',
+    lat: 3.6870, // TODO: verify coordinates
+    lng: 101.5220, // TODO: verify coordinates
   ),
   Restaurant(
     id: '5',
-    name: 'Protein Power Hub',
-    cuisine: 'Fitness Food',
-    rating: 4.4,
-    address: 'Proton City, Tanjung Malim, Perak',
-    hours: '6:00 AM - 8:00 PM',
-    tags: ['High-Protein', 'Meal Prep', 'Keto'],
-    description:
-        'Macro-friendly meals designed for athletes and UPSI students.',
-    priceRange: 'RM',
-    lat: 3.7010,
-    lng: 101.5320,
+    name: 'Sambal Bakar Malaya - Tg Malim',
+    cuisine: 'Malaysian',
+    rating: 4.9,
+    address: '20, Jalan U1, Taman Universiti, '
+        '35900 Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Malaysian', 'Protein', 'Rice Meals'],
+    description: 'Malaysian set meals. Check portion sizes, sauces, '
+        'and available vegetable options when choosing a meal.',
+    priceRange: 'Check menu',
+    lat: 3.6970, // TODO: verify coordinates
+    lng: 101.5320, // TODO: verify coordinates
   ),
   Restaurant(
     id: '6',
-    name: 'Kebun Hijau Plant-Based',
-    cuisine: 'Plant-Based',
-    rating: 4.9,
-    address: 'Jalan Ustaz Yusuf, Tanjung Malim, Perak',
-    hours: '9:00 AM - 9:00 PM',
-    tags: ['Plant-Based', 'Raw', 'Sustainable'],
-    description:
-        '100% plant-based menu featuring local Malaysian produce and zero-waste philosophy.',
-    priceRange: 'RM RM',
-    lat: 3.6855,
-    lng: 101.5210,
+    name: 'Restoran Warisan Bonda',
+    cuisine: 'Traditional Malay',
+    rating: 4.3,
+    address: '35, Jalan Bernam 1, Taman Bernam Baru, '
+        '35900 Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Malay', 'Traditional', 'Vegetables'],
+    description: 'Traditional Malay dishes. Check the current menu '
+        'and select suitable vegetable and protein options.',
+    priceRange: 'Check menu',
+    lat: 3.6880, // TODO: verify coordinates
+    lng: 101.5190, // TODO: verify coordinates
+  ),
+  Restaurant(
+    id: '7',
+    name: 'SKS Saran Curry House',
+    cuisine: 'Indian & Malaysian',
+    rating: null,
+    address: 'No. 3, Jalan Kolek 1A, Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Vegetables', 'Protein', 'Rice Meals'],
+    description: 'Indian and Malaysian meals with vegetarian '
+        'and non-vegetarian options. Check the menu '
+        'for suitable vegetable and protein choices.',
+    priceRange: 'Check menu',
+    lat: 3.6900, // TODO: verify map coordinates
+    lng: 101.5200, // TODO: verify map coordinates
+  ),
+  Restaurant(
+    id: '8',
+    name: 'Capati Telur Goyang / Kaki Ayam',
+    cuisine: 'Indian & Malaysian',
+    rating: null,
+    address: 'No. 12, Kampung Klan Halt 3, Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Vegetarian', 'Indian', 'Bread'],
+    description: 'Casual eatery with capati and other local dishes. '
+        'Check the menu and preparation methods for '
+        'options that suit your dietary needs.',
+    priceRange: 'Check menu',
+    lat: 3.6800, // TODO: verify map coordinates
+    lng: 101.5100, // TODO: verify map coordinates
+  ),
+  Restaurant(
+    id: '9',
+    name: 'Guang Ming Vegetarian',
+    cuisine: 'Chinese Vegetarian',
+    rating: null,
+    address: 'Lot 134, Taman Bandar, 35900 Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Vegetarian', 'Chinese', 'Plant-Based'],
+    description: 'Vegetarian noodle-based dishes and local food. '
+        'Confirm current operating status and menu '
+        'before visiting.',
+    priceRange: 'Check menu',
+    lat: 3.6900, // TODO: verify map coordinates
+    lng: 101.5250, // TODO: verify map coordinates
+  ),
+  Restaurant(
+    id: '10',
+    name: 'U One Me Cafe',
+    cuisine: 'Chinese',
+    rating: null,
+    address: 'No. 2, Jalan Bintang, Jalan Loke Yew, '
+        '35900 Tanjong Malim, Perak',
+    hours: '10:00 AM - 5:00 PM (verify)',
+    tags: ['Vegetarian Options', 'Noodles', 'Rice Meals'],
+    description: 'Chinese-style cafe serving noodle and rice dishes. '
+        'Vegetarian options have been mentioned in reviews; '
+        'confirm the current menu.',
+    priceRange: 'Check menu',
+    lat: 3.6850, // TODO: verify map coordinates
+    lng: 101.5220, // TODO: verify map coordinates
   ),
 ];
 
 const List<String> tagFilters = [
   'All',
-  'Vegan',
-  'High-Protein',
-  'Low-Carb',
-  'Organic',
-  'Plant-Based',
+  'Malay',
+  'Traditional',
+  'Vegetables',
 ];
 
 // ─────────────────────────────────────────
@@ -255,7 +320,7 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
   // Real distance from user location
   String _calculateDistance(Restaurant r) {
     if (_userLocation == null) return '—';
-    final distanceCalc = const Distance();
+    const distanceCalc = Distance();
     final meters = distanceCalc(_userLocation!, LatLng(r.lat, r.lng));
     if (meters < 1000) return '${meters.round()} m';
     return '${(meters / 1000).toStringAsFixed(1)} km';
@@ -281,10 +346,12 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
+        if (permission == LocationPermission.deniedForever) {
           if (!mounted) return;
+
           setState(() {
-            _locationError = 'Location permission denied.';
+            _locationError = 'Location permission is permanently denied. '
+                'Please enable it in app settings.';
             _loadingLocation = false;
           });
           return;
@@ -303,8 +370,10 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
 
       // timeLimit stops the spinner from hanging forever indoors / on emulators.
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 15),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
 
       if (!mounted) return;
@@ -333,6 +402,7 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
       );
       return;
     }
+    if (_loadingRoute) return;
 
     setState(() {
       _loadingRoute = true;
@@ -530,9 +600,21 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
                               color: Colors.orange, fontSize: 13)),
                     ),
                     TextButton(
-                      onPressed: _getUserLocation,
-                      child: const Text('Retry',
-                          style: TextStyle(color: Colors.orange)),
+                      onPressed: () async {
+                        if (_locationError != null &&
+                            _locationError!.contains('permanently denied')) {
+                          await Geolocator.openAppSettings();
+                        } else {
+                          await _getUserLocation();
+                        }
+                      },
+                      child: Text(
+                        _locationError != null &&
+                                _locationError!.contains('permanently denied')
+                            ? 'Open Settings'
+                            : 'Retry',
+                        style: const TextStyle(color: Colors.orange),
+                      ),
                     ),
                   ],
                 ),
@@ -594,7 +676,14 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
             child: FilterChip(
               label: Text(tag),
               selected: isActive,
-              onSelected: (_) => setState(() => _activeFilter = tag),
+              onSelected: (_) {
+                setState(() {
+                  _activeFilter = tag;
+                  _selectedId = null;
+                  _routePoints = [];
+                  _routeInfo = null;
+                });
+              },
               selectedColor:
                   isDark ? const Color(0xFF2E7D32) : Colors.green[600],
               backgroundColor: isDark ? const Color(0xFF1B3B2B) : Colors.white,
@@ -826,7 +915,12 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
                   Wrap(
                     spacing: 12,
                     children: [
-                      _infoChip(Icons.star, '${r.rating}', Colors.amber),
+                      if (r.rating != null)
+                        _infoChip(
+                          Icons.star,
+                          r.rating!.toStringAsFixed(1),
+                          Colors.amber,
+                        ),
                       _infoChip(
                           Icons.place, _calculateDistance(r), Colors.grey),
                       _infoChip(Icons.access_time, r.hours, Colors.grey),
@@ -879,7 +973,15 @@ class _PlacesScreenPageState extends State<PlacesScreenPage> {
                         final isActive = _routeMode == mode;
                         return Expanded(
                           child: GestureDetector(
-                            onTap: () => setState(() => _routeMode = mode),
+                            onTap: () {
+                              if (_routeMode == mode) return;
+
+                              setState(() {
+                                _routeMode = mode;
+                                _routePoints = [];
+                                _routeInfo = null;
+                              });
+                            },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               margin:

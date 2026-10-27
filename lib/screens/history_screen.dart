@@ -54,7 +54,8 @@ class _HistoryScreenPageState extends State<HistoryScreenPage> {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Couldn't load your history. Pull down to try again.")),
+            content:
+                Text("Couldn't load your history. Pull down to try again.")),
       );
     }
   }

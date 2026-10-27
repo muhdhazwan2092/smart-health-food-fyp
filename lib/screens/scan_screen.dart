@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -527,11 +526,11 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : Colors.black87,
+                color: Colors.white
               ),
         ),
-        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        foregroundColor: isDark ? Colors.white : Colors.black,
+        backgroundColor: isDark ? const Color(0xFF1B3B2B) : Colors.green[700],
+        foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           IconButton(
@@ -622,8 +621,7 @@ class _ScanScreenPageState extends State<ScanScreenPage> {
                               children: [
                                 const CircleAvatar(
                                   backgroundColor: Color(0xFFE8F5E9),
-                                  child:
-                                      Icon(Icons.image, color: Colors.green),
+                                  child: Icon(Icons.image, color: Colors.green),
                                 ),
                                 const SizedBox(height: 10),
                                 Text(tr('scan_gallery'),

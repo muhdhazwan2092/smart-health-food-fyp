@@ -261,8 +261,8 @@ User question: $userMessage
     final bgColor = isDarkMode ? const Color(0xFF0F1F17) : AppColors.bg;
     final panelColor = isDarkMode ? const Color(0xFF1B3B2B) : Colors.white;
     final mutedText = isDarkMode
-        ? Colors.white.withOpacity(0.7)
-        : Colors.black.withOpacity(0.6);
+        ? Colors.white.withValues(alpha: 0.7)
+        : Colors.black.withValues(alpha: 0.6);
     final suggestions = _suggestions;
 
     return Scaffold(
@@ -304,8 +304,7 @@ User question: $userMessage
                 final isUser = message['isUser'] as bool;
                 final isLatestBot = !isUser && index == _messages.length - 1;
                 final key = message['key'] as String?;
-                final text =
-                    key != null ? tr(key) : message['text'] as String;
+                final text = key != null ? tr(key) : message['text'] as String;
 
                 return _buildMessageBubble(
                   text,
@@ -344,17 +343,17 @@ User question: $userMessage
                         style: TextStyle(
                           fontSize: 13,
                           color: isDarkMode
-                              ? Colors.white.withOpacity(0.87)
+                              ? Colors.white.withValues(alpha: 0.87)
                               : AppColors.ink,
                         ),
                       ),
                       backgroundColor: isDarkMode
                           ? const Color(0xFF2C4A3A)
-                          : AppColors.accentSoft.withOpacity(0.55),
+                          : AppColors.accentSoft.withValues(alpha: 0.55),
                       side: BorderSide(
                         color: isDarkMode
-                            ? AppColors.primaryLight.withOpacity(0.5)
-                            : AppColors.primary.withOpacity(0.25),
+                            ? AppColors.primaryLight.withValues(alpha: 0.5)
+                            : AppColors.primary.withValues(alpha: 0.25),
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: tagRadius(r: 20, sharp: 6),
@@ -374,7 +373,7 @@ User question: $userMessage
               boxShadow: [
                 BoxShadow(
                   color: (isDarkMode ? Colors.black : Colors.grey)
-                      .withOpacity(0.1),
+                      .withValues(alpha: 0.1),
                   spreadRadius: 1,
                   blurRadius: 3,
                   offset: const Offset(0, -1),
@@ -396,7 +395,7 @@ User question: $userMessage
                           textInputAction: TextInputAction.send,
                           style: TextStyle(
                             color: isDarkMode
-                                ? Colors.white.withOpacity(0.87)
+                                ? Colors.white.withValues(alpha: 0.87)
                                 : AppColors.ink,
                           ),
                           decoration: InputDecoration(
@@ -480,7 +479,7 @@ User question: $userMessage
     bool canCopy = false,
   }) {
     final botTextColor =
-        isDarkMode ? Colors.white.withOpacity(0.92) : AppColors.ink;
+        isDarkMode ? Colors.white.withValues(alpha: 0.92) : AppColors.ink;
     final botNameColor =
         isDarkMode ? const Color(0xFF9BE0B5) : AppColors.primaryDark;
 
@@ -499,7 +498,7 @@ User question: $userMessage
               : (isDarkMode ? const Color(0xFF1B3B2B) : Colors.white),
           // Subtle outline so the bot bubble stands out from the dark background
           border: (!isUser && isDarkMode)
-              ? Border.all(color: Colors.white.withOpacity(0.10))
+              ? Border.all(color: Colors.white.withValues(alpha: 0.10))
               : null,
           // Bubbles keep the app's tag motif: sharp corner on the side
           // pointing toward the sender.
@@ -518,7 +517,7 @@ User question: $userMessage
                 ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.ink.withOpacity(0.05),
+              color: AppColors.ink.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -579,7 +578,7 @@ User question: $userMessage
                   tr('chat_you'),
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ),
@@ -626,7 +625,7 @@ User question: $userMessage
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.ink.withOpacity(0.05),
+              color: AppColors.ink.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -641,7 +640,9 @@ User question: $userMessage
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  isDarkMode ? Colors.white.withOpacity(0.87) : AppColors.ink,
+                  isDarkMode
+                      ? Colors.white.withValues(alpha: 0.87)
+                      : AppColors.ink,
                 ),
               ),
             ),
@@ -650,7 +651,7 @@ User question: $userMessage
               tr('chat_thinking'),
               style: TextStyle(
                 color: isDarkMode
-                    ? Colors.white.withOpacity(0.87)
+                    ? Colors.white.withValues(alpha: 0.87)
                     : AppColors.inkSoft,
                 fontSize: 14,
                 fontStyle: FontStyle.italic,

@@ -58,10 +58,7 @@ class SupabaseService {
 
   Future<void> clearAll() async {
     try {
-      await client
-          .from('food_history')
-          .delete()
-          .eq('user_id', _userId);
+      await client.from('food_history').delete().eq('user_id', _userId);
     } catch (e) {
       throw Exception('Failed to clear history: $e');
     }

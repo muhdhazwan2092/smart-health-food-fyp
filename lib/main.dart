@@ -117,7 +117,7 @@ class SmartHealthFoodApp extends StatelessWidget {
             brightness: Brightness.dark,
             colorScheme: darkScheme,
             snackBarTheme: snackTheme,
-            textTheme: buildTextTheme(Colors.white.withOpacity(0.92)),
+            textTheme: buildTextTheme(Colors.white.withValues(alpha: 0.92)),
           ),
           themeMode: mode, // driven by the global notifier in app_theme.dart
           home: const AuthWrapper(),
@@ -252,8 +252,8 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
                 child: AnimatedBuilder(
                   animation: _fabController,
                   builder: (context, child) => Container(
-                    color:
-                        Colors.black.withOpacity(0.25 * _fabController.value),
+                    color: Colors.black
+                        .withValues(alpha: 0.25 * _fabController.value),
                   ),
                 ),
               ),
@@ -310,7 +310,8 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
           borderRadius: tagRadius(r: 30, sharp: 12),
           boxShadow: [
             BoxShadow(
-              color: (isDark ? Colors.black : AppColors.ink).withOpacity(0.22),
+              color: (isDark ? Colors.black : AppColors.ink)
+                  .withValues(alpha: 0.22),
               blurRadius: 24,
               offset: const Offset(0, 10),
             ),
@@ -334,8 +335,8 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
                     decoration: BoxDecoration(
                       // HCI FIX: brighter pill so the active tab is obvious
                       color: isDark
-                          ? const Color(0xFF81C784).withOpacity(0.28)
-                          : AppColors.primary.withOpacity(0.14),
+                          ? const Color(0xFF81C784).withValues(alpha: 0.28)
+                          : AppColors.primary.withValues(alpha: 0.14),
                       borderRadius: tagRadius(r: 20, sharp: 8),
                     ),
                   ),
@@ -464,7 +465,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
                   borderRadius: tagRadius(r: 14, sharp: 6),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.ink.withOpacity(0.10),
+                      color: AppColors.ink.withValues(alpha: 0.10),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),

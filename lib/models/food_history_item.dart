@@ -18,14 +18,14 @@ class FoodHistoryItem {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'foodName': foodName,
-    'calories': calories,
-    'ingredients': ingredients,
-    'healthNotes': healthNotes,
-    'timestamp': timestamp.toIso8601String(),
-    'imagePath': imagePath,
-  };
+        'id': id,
+        'foodName': foodName,
+        'calories': calories,
+        'ingredients': ingredients,
+        'healthNotes': healthNotes,
+        'timestamp': timestamp.toIso8601String(),
+        'imagePath': imagePath,
+      };
 
   factory FoodHistoryItem.fromJson(Map<String, dynamic> json) {
     return FoodHistoryItem(

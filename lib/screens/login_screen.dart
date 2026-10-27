@@ -170,17 +170,17 @@ class _LoginPageState extends State<LoginPage> {
           Positioned(
             top: -70,
             right: -50,
-            child: _blob(200, AppColors.primary.withOpacity(0.10)),
+            child: _blob(200, AppColors.primary.withValues(alpha: 0.10)),
           ),
           Positioned(
             top: 140,
             left: -80,
-            child: _blob(160, AppColors.accent.withOpacity(0.16)),
+            child: _blob(160, AppColors.accent.withValues(alpha: 0.16)),
           ),
           Positioned(
             bottom: -90,
             right: -40,
-            child: _blob(240, AppColors.primary.withOpacity(0.08)),
+            child: _blob(240, AppColors.primary.withValues(alpha: 0.08)),
           ),
 
           SafeArea(
@@ -212,7 +212,8 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: tagRadius(r: 30, sharp: 10),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.28),
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.28),
                                 blurRadius: 24,
                                 offset: const Offset(0, 10),
                               ),
@@ -244,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
                             ? "Welcome back — let's fuel your day."
                             : 'A few taps and your kitchen gets smarter.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           color: AppColors.inkSoft,
                         ),
@@ -259,7 +260,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: tagRadius(r: 32, sharp: 10),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.ink.withOpacity(0.08),
+                              color: AppColors.ink.withValues(alpha: 0.08),
                               blurRadius: 30,
                               offset: const Offset(0, 14),
                             ),
@@ -359,8 +360,8 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color:
-                                            AppColors.primary.withOpacity(0.30),
+                                        color: AppColors.primary
+                                            .withValues(alpha: 0.30),
                                         blurRadius: 16,
                                         offset: const Offset(0, 8),
                                       ),
@@ -401,13 +402,18 @@ class _LoginPageState extends State<LoginPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    _isLogin
-                                        ? "Don't have an account?"
-                                        : 'Already have an account?',
-                                    style:
-                                        TextStyle(color: Colors.grey.shade600),
+                                  Flexible(
+                                    child: Text(
+                                      _isLogin
+                                          ? "Don't have an account?"
+                                          : 'Already have an account?',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
                                   ),
+                                  const SizedBox(width: 4),
                                   TextButton(
                                     onPressed: () {
                                       setState(() {
@@ -417,6 +423,13 @@ class _LoginPageState extends State<LoginPage> {
                                     },
                                     style: TextButton.styleFrom(
                                       foregroundColor: AppColors.primaryDark,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 8,
+                                      ),
+                                      minimumSize: Size.zero,
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
                                     ),
                                     child: Text(
                                       _isLogin ? 'Sign Up' : 'Login',
@@ -456,27 +469,30 @@ class _LoginPageState extends State<LoginPage> {
                                 onPressed: _isLoading
                                     ? null
                                     : () async {
+                                        final navigator = Navigator.of(context);
                                         setState(() => _isLoading = true);
+
                                         try {
                                           await Supabase.instance.client.auth
                                               .signInAnonymously();
-                                          if (mounted) {
-                                            Navigator.of(context)
-                                                .pushReplacement(
-                                              MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      const MainApp()),
-                                            );
-                                          }
+
+                                          if (!mounted) return;
+
+                                          navigator.pushReplacement(
+                                            MaterialPageRoute(
+                                              builder: (_) => const MainApp(),
+                                            ),
+                                          );
                                         } catch (e) {
+                                          if (!mounted) return;
+
+                                          final info = _describeAuthError(e);
+                                          _showSnack(info.message,
+                                              isError: true);
+                                        } finally {
                                           if (mounted) {
-                                            final info = _describeAuthError(e);
-                                            _showSnack(info.message,
-                                                isError: true);
+                                            setState(() => _isLoading = false);
                                           }
-                                        }
-                                        if (mounted) {
-                                          setState(() => _isLoading = false);
                                         }
                                       },
                                 icon: const Icon(Icons.person_outline_rounded,
@@ -485,8 +501,8 @@ class _LoginPageState extends State<LoginPage> {
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.primaryDark,
                                   side: BorderSide(
-                                      color:
-                                          AppColors.primary.withOpacity(0.3)),
+                                      color: AppColors.primary
+                                          .withValues(alpha: 0.3)),
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 12),
                                   shape: RoundedRectangleBorder(
@@ -526,7 +542,7 @@ class _LoginPageState extends State<LoginPage> {
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: AppColors.ink.withOpacity(0.08),
+                    color: AppColors.ink.withValues(alpha: 0.08),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -556,7 +572,7 @@ class _LoginPageState extends State<LoginPage> {
       prefixIcon: Icon(icon, color: Colors.grey.shade500),
       suffixIcon: suffix,
       filled: true,
-      fillColor: AppColors.bg.withOpacity(0.6),
+      fillColor: AppColors.bg.withValues(alpha: 0.6),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: Colors.grey.shade200),

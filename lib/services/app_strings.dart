@@ -22,11 +22,19 @@ const Map<String, Map<String, String>> _strings = {
   // ── Bottom navigation + floating menu ──────────────────
   'nav_dashboard': {'en': 'Dashboard', 'ms': 'Papan Pemuka', 'zh': '首页'},
   'nav_scan': {'en': 'Scan', 'ms': 'Imbas', 'zh': '扫描'},
-  'nav_history': {'en': 'History', 'ms': 'Sejarah', 'zh': '历史'},
-  'nav_places': {'en': 'Places', 'ms': 'Tempat', 'zh': '地点'},
+  'nav_history': {'en': 'History', 'ms': 'Rekod', 'zh': '历史'},
+  'nav_places': {'en': 'Places', 'ms': 'Lokasi', 'zh': '地点'},
   'menu_profile': {'en': 'Profile', 'ms': 'Profil', 'zh': '个人资料'},
-  'menu_chat': {'en': 'Nutrition Chat', 'ms': 'Sembang Nutrisi', 'zh': '营养聊天'},
-  'menu_open': {'en': 'Chat & Profile', 'ms': 'Sembang & Profil', 'zh': '聊天与资料'},
+  'menu_chat': {
+    'en': 'Nutrition Chat',
+    'ms': 'Sembang Pemakanan',
+    'zh': '营养聊天'
+  },
+  'menu_open': {
+    'en': 'Chat & Profile',
+    'ms': 'Sembang & Profil',
+    'zh': '聊天与资料'
+  },
   'menu_close': {'en': 'Close menu', 'ms': 'Tutup menu', 'zh': '关闭菜单'},
 
   // ── Common ─────────────────────────────────────────────
@@ -45,7 +53,8 @@ const Map<String, Map<String, String>> _strings = {
   },
   'dash_subtitle': {
     'en': 'Track your nutrition with AI-powered food recognition.',
-    'ms': 'Jejaki pemakanan anda dengan pengecaman makanan berkuasa AI.',
+    'ms':
+        'Pantau pemakanan anda dengan bantuan AI untuk mengenal pasti makanan.',
     'zh': '通过 AI 食物识别追踪您的营养摄入。',
   },
   'dash_progress': {
@@ -53,8 +62,8 @@ const Map<String, Map<String, String>> _strings = {
     'ms': 'Kemajuan Hari Ini',
     'zh': '今日进度',
   },
-  'ring_left': {'en': 'cal left', 'ms': 'kal berbaki', 'zh': '剩余千卡'},
-  'ring_over': {'en': 'cal over', 'ms': 'kal lebih', 'zh': '超出千卡'},
+  'ring_left': {'en': 'cal left', 'ms': 'kalori berbaki', 'zh': '剩余千卡'},
+  'ring_over': {'en': 'cal over', 'ms': 'kalori lebih', 'zh': '超出千卡'},
   'stat_calories_today': {
     'en': 'Calories today',
     'ms': 'Kalori hari ini',
@@ -62,7 +71,7 @@ const Map<String, Map<String, String>> _strings = {
   },
   'stat_of_goal': {
     'en': '/ {goal} cal',
-    'ms': '/ {goal} kal',
+    'ms': '/ {goal} kalori',
     'zh': '/ {goal} 千卡',
   },
   'stat_total_scans': {
@@ -83,20 +92,20 @@ const Map<String, Map<String, String>> _strings = {
   },
   'over_message': {
     'en': "You're {n} cal over today's goal",
-    'ms': 'Anda melebihi sasaran hari ini sebanyak {n} kal',
+    'ms': 'Anda melebihi sasaran hari ini sebanyak {n} kalori',
     'zh': '今天已超出目标 {n} 千卡',
   },
-  'week_title': {'en': 'Last 7 days', 'ms': '7 hari lepas', 'zh': '最近 7 天'},
+  'week_title': {'en': 'Last 7 days', 'ms': '7 hari terakhir', 'zh': '最近 7 天'},
   'avg_per_day': {
     'en': 'Avg {n} cal/day',
-    'ms': 'Purata {n} kal/hari',
+    'ms': 'Purata {n} kalori sehari',
     'zh': '平均 {n} 千卡/天',
   },
   'no_data_yet': {'en': 'No data yet', 'ms': 'Belum ada data', 'zh': '暂无数据'},
   'chart_today': {'en': 'Today', 'ms': 'Hari ini', 'zh': '今天'},
   'legend_goal': {
     'en': 'Goal {n} cal',
-    'ms': 'Sasaran {n} kal',
+    'ms': 'Sasaran {n} kalori',
     'zh': '目标 {n} 千卡',
   },
   'legend_over': {
@@ -138,7 +147,7 @@ const Map<String, Map<String, String>> _strings = {
   },
   'scan_item': {
     'en': '{cal} cal · {date}',
-    'ms': '{cal} kal · {date}',
+    'ms': '{cal} kalori · {date}',
     'zh': '{cal} 千卡 · {date}',
   },
 
@@ -186,7 +195,8 @@ const Map<String, Map<String, String>> _strings = {
   },
   'err_rate': {
     'en': 'Too many requests right now. Please wait a minute and try again.',
-    'ms': 'Terlalu banyak permintaan sekarang. Sila tunggu seminit dan cuba lagi.',
+    'ms':
+        'Terlalu banyak permintaan sekarang. Sila tunggu seminit dan cuba lagi.',
     'zh': '请求过于频繁，请稍等一分钟后重试。',
   },
   'err_key': {
@@ -313,7 +323,8 @@ const Map<String, Map<String, String>> _strings = {
   },
   'chat_you': {'en': 'You', 'ms': 'Anda', 'zh': '你'},
   'chat_err_timeout': {
-    'en': 'Sorry, that took too long. Please check your connection and try again.',
+    'en':
+        'Sorry, that took too long. Please check your connection and try again.',
     'ms':
         'Maaf, ia mengambil masa terlalu lama. Sila semak sambungan anda dan cuba lagi.',
     'zh': '抱歉，这花了太长时间。请检查网络连接后重试。',
@@ -518,7 +529,8 @@ const Map<String, Map<String, String>> _strings = {
   },
   'prof_snack_reset_fail': {
     'en': 'Could not send the reset email. Please try again later.',
-    'ms': 'Tidak dapat menghantar e-mel tetapan semula. Sila cuba lagi kemudian.',
+    'ms':
+        'Tidak dapat menghantar e-mel tetapan semula. Sila cuba lagi kemudian.',
     'zh': '无法发送重置邮件，请稍后再试。',
   },
   'prof_snack_guest_pw': {
@@ -603,7 +615,11 @@ const Map<String, Map<String, String>> _strings = {
   },
 
   // ── Calorie goal dialog ────────────────────────────────
-  'goal_mode_manual': {'en': 'Enter myself', 'ms': 'Taip sendiri', 'zh': '自己输入'},
+  'goal_mode_manual': {
+    'en': 'Enter myself',
+    'ms': 'Taip sendiri',
+    'zh': '自己输入'
+  },
   'goal_mode_calc': {'en': 'Calculate', 'ms': 'Kira', 'zh': '计算'},
   'goal_unit': {'en': 'cal', 'ms': 'kal', 'zh': '千卡'},
   'goal_value': {'en': '{n} cal', 'ms': '{n} kal', 'zh': '{n} 千卡'},

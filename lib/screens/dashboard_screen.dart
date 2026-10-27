@@ -174,9 +174,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
-                color: isDarkMode ? Colors.white : Colors.black87,
+                color: Colors.white
               ),
         ),
+        backgroundColor:
+            isDarkMode ? const Color(0xFF1B3B2B) : Colors.green[700],
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             tooltip: tr('common_toggle_dark'),

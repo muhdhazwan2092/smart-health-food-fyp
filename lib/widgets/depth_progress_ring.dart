@@ -79,7 +79,7 @@ class _DepthRingPainter extends CustomPainter {
       center.translate(0, 3),
       ringRadius,
       Paint()
-        ..color = Colors.black.withOpacity(0.14)
+        ..color = Colors.black.withValues(alpha: 0.14)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth,
@@ -92,9 +92,9 @@ class _DepthRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..shader = SweepGradient(
         colors: [
-          trackBase.withOpacity(0.55),
-          Colors.white.withOpacity(0.9),
-          trackBase.withOpacity(0.55),
+          trackBase.withValues(alpha: 0.55),
+          Colors.white.withValues(alpha: 0.9),
+          trackBase.withValues(alpha: 0.55),
         ],
         stops: const [0.0, 0.5, 1.0],
         transform: const GradientRotation(-math.pi / 2),
@@ -107,7 +107,7 @@ class _DepthRingPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..shader = LinearGradient(
-        colors: [color.withOpacity(0.85), color, highlightColor],
+        colors: [color.withValues(alpha: 0.85), color, highlightColor],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ).createShader(rect);
@@ -134,7 +134,7 @@ class _DepthRingPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2
         ..strokeCap = StrokeCap.round
-        ..color = Colors.white.withOpacity(0.55),
+        ..color = Colors.white.withValues(alpha: 0.55),
     );
   }
 
