@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/food_history_item.dart';
 import '../services/supabase_service.dart';
+import '../services/app_strings.dart';
 
 class HistoryScreenPage extends StatefulWidget {
   final bool isDarkMode;
@@ -228,7 +229,7 @@ class _HistoryScreenPageState extends State<HistoryScreenPage> {
             Icon(Icons.restaurant_outlined, size: 52, color: muted),
             const SizedBox(height: 12),
             Text(
-              'No food history yet',
+              tr('no_food_history'),
               style: TextStyle(fontSize: 16, color: muted),
             ),
           ],
@@ -295,13 +296,13 @@ class _HistoryScreenPageState extends State<HistoryScreenPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Food History',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
+        title: Text(
+          tr('history_title'),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
         ),
         backgroundColor: isDark ? const Color(0xFF1B3B2B) : Colors.green[700],
         foregroundColor: Colors.white,

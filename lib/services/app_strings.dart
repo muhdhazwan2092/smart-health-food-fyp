@@ -246,6 +246,20 @@ const Map<String, Map<String, String>> _strings = {
   'scan_diet_tags': {'en': 'Diet Tags', 'ms': 'Tag Diet', 'zh': '饮食标签'},
   'scan_ingredients': {'en': 'Ingredients', 'ms': 'Bahan', 'zh': '配料'},
 
+  // ── Food History ─────────────────────────────────────
+
+  'history_title': {
+    'en': 'Food History',
+    'ms': 'Rekod Pemakanan',
+    'zh': '饮食记录',
+  },
+
+  'no_food_history': {
+    'en': 'No food history yet',
+    'ms': 'Belum ada rekod pemakanan',
+    'zh': '暂无饮食记录',
+  },
+
   // ── Common buttons ─────────────────────────────────────
   'common_cancel': {'en': 'Cancel', 'ms': 'Batal', 'zh': '取消'},
 
